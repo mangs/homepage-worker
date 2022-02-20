@@ -5,13 +5,20 @@ import assetManifestJson from '__STATIC_CONTENT_MANIFEST'
 const assetMap = JSON.parse(assetManifestJson);
 const assetDirectory = '/assets';
 const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Eric's House</title>
+  <meta name="description" content="Eric L. Goldstein's homepage">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
 <body>
   <h1>Eric's House</h1>
   <p>
-    <img src="./assets/images/mango-man.png?one=two" />
-    <img src="./assets/fake.png" />
+    <img src="./assets/images/mango-man.png?one=two" height="600" width="600" alt="" />
+    <!-- <img src="./assets/fake.png" alt="" /> -->
   </p>
-</body>`;
+</body>
+</html>`;
 
 // Local Functions
 function buildHeaders(url) {
