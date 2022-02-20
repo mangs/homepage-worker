@@ -1,0 +1,3 @@
+# Eric's Homepage
+
+This will hopefully get better...

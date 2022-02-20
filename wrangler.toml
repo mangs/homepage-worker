@@ -1,0 +1,20 @@
+name = "homepage"
+type = "javascript"
+compatibility_date = "2022-02-19"
+workers_dev = true
+
+[dev]
+port = 8080
+
+[build]
+command = ""
+watch_dir = "src"
+
+[build.upload]
+dir = "src"
+format = "modules"
+main = "./worker.mjs"
+
+[site]
+bucket = "./assets"
+entry-point = "./src"
