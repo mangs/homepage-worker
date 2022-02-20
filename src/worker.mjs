@@ -14,7 +14,7 @@ const html = `<!DOCTYPE html>
 <body>
   <h1>Eric's House</h1>
   <p>
-    <img src="./assets/images/mango-man.png?one=two" height="600" width="600" alt="" />
+    <img src="./assets/images/mango-man.png" height="600" width="600" alt="" />
     <!-- <img src="./assets/fake.png" alt="" /> -->
   </p>
 </body>
@@ -28,8 +28,8 @@ function buildHeaders(url) {
   const mimeType = getMimeType(fileExtension);
 
   return {
-    'cache-control': 's-maxage=12345',
-    'content-type':  mimeType,
+    'Cache-Control': 'max-age=31536000, stale-if-error=86400, no-transform',
+    'Content-Type':  mimeType,
   };
 }
 
