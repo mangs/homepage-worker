@@ -28,7 +28,7 @@ function buildHeaders(url) {
   const mimeType = getMimeType(fileExtension);
 
   return {
-    'Cache-Control': 'max-age=31536000, stale-if-error=86400, no-transform',
+    'Cache-Control': 'max-age=5, s-maxage=31536000, stale-if-error=86400, no-transform',
     'Content-Type':  mimeType,
   };
 }
