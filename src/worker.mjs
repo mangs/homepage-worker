@@ -4,7 +4,6 @@ import assetManifestJson from '__STATIC_CONTENT_MANIFEST'
 // Local Variables
 const assetMap = JSON.parse(assetManifestJson);
 const assetsDirectory = '/assets';
-const cache = caches.default;
 const routesDirectory = '/routes';
 
 // Local Functions
@@ -15,7 +14,7 @@ function buildHeaders(url) {
   const mimeType = getMimeType(fileExtension);
 
   return {
-    'Cache-Control': 'no-transform, stale-if-error=86400, s-maxage=31536000, max-age=1',
+    'Cache-Control': 'no-transform, stale-if-error=86400, s-maxage=31536000, max-age=5',
     'Content-Type':  mimeType,
   };
 }
@@ -52,7 +51,7 @@ export default {
     }
 
     // Respond from cache if a record exists
-    const cacheRecord = await cache.match(request);
+    const cacheRecord = await caches.default.match(request);
     if (cacheRecord) {
       return cacheRecord;
     }
@@ -73,7 +72,7 @@ export default {
       status: 200,
     });
     context.waitUntil(
-      cache.put(request, response.clone())
+      caches.default.put(request, response.clone())
     );
     return response;
   }
