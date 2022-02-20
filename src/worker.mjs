@@ -3,22 +3,9 @@ import assetManifestJson from '__STATIC_CONTENT_MANIFEST'
 
 // Local Variables
 const assetMap = JSON.parse(assetManifestJson);
-const assetDirectory = '/assets';
-const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Eric's House</title>
-  <meta name="description" content="Eric L. Goldstein's homepage">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-</head>
-<body>
-  <h1>Eric's House</h1>
-  <p>
-    <img src="./assets/images/mango-man.png" height="600" width="600" alt="" />
-    <!-- <img src="./assets/fake.png" alt="" /> -->
-  </p>
-</body>
-</html>`;
+const assetsDirectory = '/assets';
+const cache = caches.default;
+const routesDirectory = '/routes';
 
 // Local Functions
 function buildHeaders(url) {
@@ -28,21 +15,22 @@ function buildHeaders(url) {
   const mimeType = getMimeType(fileExtension);
 
   return {
-    'Cache-Control': 'max-age=5, s-maxage=31536000, stale-if-error=86400, no-transform',
+    'Cache-Control': 'no-transform, stale-if-error=86400, s-maxage=31536000, max-age=1',
     'Content-Type':  mimeType,
   };
 }
 
-function getAssetPath(url) {
-  return url.pathname.replace(assetDirectory, '').substring(1);
+function getAssetPath({ pathname }) {
+  let path = pathname;
+  if (path.endsWith('/')) {
+    path = `${assetsDirectory}${routesDirectory}${path}index.html`;
+  }
+  return path.replace(assetsDirectory, '').substring(1);
 }
 
 function getMimeType(fileExtension) {
   switch(fileExtension) {
     case 'css': return  'text/css';
-    case 'html': return 'text/html;charset=UTF-8';
-    case 'ico': return  'image/x-icon';
-    case 'jpeg': return 'image/jpeg';
     case 'jpg': return  'image/jpeg';
     case 'js': return   'text/javascript';
     case 'json': return 'application/json';
@@ -58,11 +46,15 @@ export default {
   async fetch(request, environment, context) {
     const url = new URL(request.url);
     const headers = buildHeaders(url);
+    const isValidMethod = /^(GET|HEAD)$/.test(request.method);
+    if (!isValidMethod) {
+      return new Response(`Method "${request.method}" not allowed`, { status: 405 });
+    }
 
-    // App Routing
-    switch (url.pathname) {
-      case '/':
-        return new Response(html, { headers, status: 200 });
+    // Respond from cache if a record exists
+    const cacheRecord = await cache.match(request);
+    if (cacheRecord) {
+      return cacheRecord;
     }
 
     // Asset Handling
@@ -70,17 +62,19 @@ export default {
     const mappedAssetPath = assetMap[assetPath];
     const assetStream = await environment.__STATIC_CONTENT.get(mappedAssetPath, { type: 'stream' });
     if (!assetStream) {
-      const responseText = `"${assetPath}" not found`;
-      return new Response(responseText, {
+      return new Response(`"${assetPath}" not found`, {
         headers,
         status: 404,
-        statusText: responseText,
       });
     }
 
-    return new Response(assetStream, {
+    const response = new Response(assetStream, {
       headers,
       status: 200,
     });
+    context.waitUntil(
+      cache.put(request, response.clone())
+    );
+    return response;
   }
 }
